@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iframe with Open VM Button and Video Background</title>
+    <style>
+        /* Make the body fill the entire viewport */
+        body, html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f0f0f0;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Video background */
+        #video-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Ensures the video covers the entire background */
+            z-index: -1; /* Ensures the video is behind other elements */
+        }
+
+        /* Style for the buttons container */
+        .button-container {
+            text-align: center;
+            margin-bottom: 20px; /* Adds some space between the buttons and iframe */
+            display: flex;
+            justify-content: center; /* Center the buttons horizontally */
+        }
+
+        /* Style for the buttons */
+        .button-container button {
+            background-color: #007bff; /* Default blue color */
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+            margin: 10px;
+            transition: transform 0.3s ease, background-color 0.5s ease; /* Smooth scaling and background color change */
+        }
+
+        /* Hover effect - rainbow fade */
+        .button-container button:hover {
+            transform: scale(1.1); /* Enlarge the button a bit */
+            animation: rainbowFade 3s infinite; /* Add rainbow fade animation */
+        }
+
+        /* Rainbow color animation for buttons */
+        @keyframes rainbowFade {
+            0% {
+                background-color: red;
+            }
+            14% {
+                background-color: orange;
+            }
+            28% {
+                background-color: yellow;
+            }
+            42% {
+                background-color: green;
+            }
+            57% {
+                background-color: blue;
+            }
+            71% {
+                background-color: indigo;
+            }
+            85% {
+                background-color: violet;
+            }
+            100% {
+                background-color: red;
+            }
+        }
+
+        /* Hide the iframe initially */
+        #iframe-container {
+            display: none;
+            width: 70vw;
+            height: 50vw;
+            max-width: 800px;
+            max-height: 600px;
+            border: 5px solid transparent;
+            border-radius: 10px; /* Slight rounding of corners */
+            overflow: hidden;
+            animation: rainbowFadeBorder 5s infinite; /* Add rainbow border animation */
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2); /* Optional: adds a shadow to the iframe container */
+        }
+
+        /* Rainbow border animation */
+        @keyframes rainbowFadeBorder {
+            0% {
+                border-color: red;
+            }
+            14% {
+                border-color: orange;
+            }
+            28% {
+                border-color: yellow;
+            }
+            42% {
+                border-color: green;
+            }
+            57% {
+                border-color: blue;
+            }
+            71% {
+                border-color: indigo;
+            }
+            85% {
+                border-color: violet;
+            }
+            100% {
+                border-color: red;
+            }
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Style for the footer text */
+        .footer {
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .footer a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Video background -->
+    <video id="video-background" autoplay muted loop>
+        <source src="particles.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    <!-- Buttons container -->
+    <div class="button-container">
+        <!-- Open VM button -->
+        <button id="open-vm-btn" onclick="openVM()">Open VM</button>
+
+        <!-- Fullscreen and Cloak buttons (initially hidden) -->
+        <button id="fullscreen-btn" onclick="toggleFullscreen()" style="display:none;">Go Fullscreen</button>
+        <button id="cloak-btn" onclick="cloakIframe()" style="display:none;">Cloak (about:blank)</button>
+        <button id="kill-vm-btn" onclick="killVM()" style="display:none;">Kill VM</button>
+    </div>
+
+    <!-- Iframe container that is hidden initially -->
+    <div id="iframe-container">
+        <iframe id="iframe" src="https://vapor.my/page/browse" allowfullscreen></iframe>
+    </div>
+
+    <!-- Footer text -->
+    <div class="footer">
+        made with 💖 by <a href="https://roman.soloo.fun" target="_blank">Roman</a>
+    </div>
+
+    <script>
+        // Wait for the DOM to be fully loaded before initializing particles.js
+        document.addEventListener("DOMContentLoaded", function() {
+            // Initialize particles.js
+            particlesJS("particles-js", {
+                "particles": {
+                    "number": {
+                        "value": 80,
+                        "density": {
+                            "enable": true,
+                            "value_area": 800
+                        }
+                    },
+                    "color": {
+                        "value": "#ffffff"
+                    },
+                    "shape": {
+                        "type": "circle",
+                        "stroke": {
+                            "width": 0,
+                            "color": "#000000"
+                        },
+                        "polygon": {
+                            "nb_sides": 5
+                        }
+                    },
+                    "opacity": {
+                        "value": 0.5,
+                        "random": true,
+                        "anim": {
+                            "enable": true,
+                            "speed": 1,
+                            "opacity_min": 0.1,
+                            "sync": false
+                        }
+                    },
+                    "size": {
+                        "value": 3,
+                        "random": true,
+                        "anim": {
+                            "enable": true,
+                            "speed": 40,
+                            "size_min": 0.1,
+                            "sync": false
+                        }
+                    },
+                    "line_linked": {
+                        "enable": true,
+                        "distance": 150,
+                        "color": "#ffffff",
+                        "opacity": 0.4,
+                        "width": 1
+                    },
+                    "move": {
+                        "enable": true,
+                        "speed": 6,
+                        "direction": "none",
+                        "random": false,
+                        "straight": false,
+                        "out_mode": "out",
+                        "bounce": false,
+                        "attract": {
+                            "enable": false,
+                            "rotateX": 600,
+                            "rotateY": 1200
+                        }
+                    }
+                },
+                "interactivity": {
+                    "detect_on": "window",
+                    "events": {
+                        "onhover": {
+                            "enable": true,
+                            "mode": "repulse"
+                        },
+                        "onclick": {
+                            "enable": true,
+                            "mode": "push"
+                        },
+                        "resize": true
+                    }
+                },
+                "retina_detect": true
+            });
+        });
+
+        // Function to show the iframe and buttons after clicking Open VM
+        function openVM() {
+            // Hide the "Open VM" button
+            document.getElementById('open-vm-btn').style.display = 'none';
+
+            // Show the iframe and other buttons
+            document.getElementById('iframe-container').style.display = 'block';
+            document.getElementById('fullscreen-btn').style.display = 'inline-block';
+            document.getElementById('cloak-btn').style.display = 'inline-block';
+            document.getElementById('kill-vm-btn').style.display = 'inline-block';
+        }
+
+        // Function to toggle fullscreen mode
+        function toggleFullscreen() {
+            var iframe = document.getElementById('iframe');
+
+            // Check if the iframe is already in fullscreen
+            if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement) {
+                // If it's in fullscreen, exit fullscreen mode
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+            } else {
+                // If it's not in fullscreen, request fullscreen for the iframe
+                if (iframe.requestFullscreen) {
+                    iframe.requestFullscreen();
+                } else if (iframe.webkitRequestFullscreen) {
+                    iframe.webkitRequestFullscreen();
+                } else if (iframe.mozRequestFullScreen) {
+                    iframe.mozRequestFullScreen();
+                } else if (iframe.msRequestFullscreen) {
+                    iframe.msRequestFullscreen();
+                }
+            }
+        }
+
+        // Function to cloak the iframe (load about:blank)
+        function cloakIframe() {
+            var iframe = document.getElementById('iframe');
+            iframe.src = "about:blank"; // Load a blank page in the iframe
+        }
+
+        // Function to kill the VM and hide iframe & buttons
+        function killVM() {
+            // Hide the iframe and buttons
+            document.getElementById('iframe-container').style.display = 'none';
+            document.getElementById('fullscreen-btn').style.display = 'none';
+            document.getElementById('cloak-btn').style.display = 'none';
+            document.getElementById('kill-vm-btn').style.display = 'none';
+
+            // Show the "Open VM" button again
+            document.getElementById('open-vm-btn').style.display = 'inline-block';
+        }
+    </script>
+
+</body>
+</html>
