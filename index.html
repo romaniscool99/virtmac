@@ -98,6 +98,48 @@
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
         }
 
+        /* Hide the OpenAI iframe initially */
+        #openai-iframe-container {
+            display: none;
+            width: 70vw;
+            height: 50vw;
+            max-width: 800px;
+            max-height: 600px;
+            border: 5px solid transparent;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            animation: rainbow-border 3s infinite; /* Rainbow border animation */
+        }
+
+        /* Rainbow border animation */
+        @keyframes rainbow-border {
+            0% {
+                border-color: red;
+            }
+            14% {
+                border-color: orange;
+            }
+            28% {
+                border-color: yellow;
+            }
+            42% {
+                border-color: green;
+            }
+            57% {
+                border-color: blue;
+            }
+            71% {
+                border-color: indigo;
+            }
+            85% {
+                border-color: violet;
+            }
+            100% {
+                border-color: red;
+            }
+        }
+
         iframe {
             width: 100%;
             height: 100%;
@@ -127,6 +169,14 @@
             font-size: 16px;
             color: green;
         }
+
+        /* Style for the "AI has been closed" message */
+        #close-ai-message {
+            display: none;
+            font-size: 16px;
+            color: red;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -139,20 +189,33 @@
         <!-- Open VM button -->
         <button id="open-vm-btn" onclick="openVM()">Open VM</button>
 
+        <!-- Open AI button -->
+        <button id="open-ai-btn" onclick="openAI()">Open AI</button>
+
         <!-- Fullscreen and Cloak buttons (initially hidden) -->
         <button id="fullscreen-btn" onclick="toggleFullscreen()" style="display:none;">Go Fullscreen</button>
         <button id="cloak-btn" onclick="cloakIframe()" style="display:none;">Cloak (about:blank)</button>
         <button id="kill-vm-btn" onclick="killVM()" style="display:none;">Kill VM</button>
     </div>
 
-    <!-- Iframe container that is hidden initially -->
+    <!-- Iframe container for VM -->
     <div id="iframe-container">
         <iframe id="iframe" src="https://vapor.my/page/browse" allowfullscreen></iframe>
+    </div>
+
+    <!-- Iframe container for OpenAI -->
+    <div id="openai-iframe-container">
+        <iframe id="openai-iframe" src="https://vapor.my/page/ai" allowfullscreen></iframe>
     </div>
 
     <!-- Shutdown message -->
     <div id="shutdown-message">
         The VM Has Been Shut Down Successfully!
+    </div>
+
+    <!-- AI has been closed message -->
+    <div id="close-ai-message">
+        AI has been closed!
     </div>
 
     <!-- Footer text -->
@@ -166,16 +229,77 @@
             // Hide the "Open VM" button
             document.getElementById('open-vm-btn').style.display = 'none';
 
-            // Show the iframe and other buttons
+            // Show the iframe and other buttons for VM
             document.getElementById('iframe-container').style.display = 'block';
             document.getElementById('fullscreen-btn').style.display = 'inline-block';
             document.getElementById('cloak-btn').style.display = 'inline-block';
             document.getElementById('kill-vm-btn').style.display = 'inline-block';
+
+            // Hide OpenAI iframe container if it was visible
+            document.getElementById('openai-iframe-container').style.display = 'none';
+            document.getElementById('close-ai-message').style.display = 'none';  // Hide the "AI closed" message
+            document.getElementById('open-ai-btn').style.display = 'inline-block'; // Show "Open AI" button
+            document.getElementById('open-ai-btn').textContent = 'Open AI'; // Reset button text
+
+            // Hide the shutdown message if it's visible
+            document.getElementById('shutdown-message').style.display = 'none';
+        }
+
+        // Function to open the OpenAI iframe
+        function openAI() {
+            // Hide the "Open AI" button and change text to "Close AI"
+            document.getElementById('open-ai-btn').style.display = 'none';
+            document.getElementById('open-ai-btn').textContent = 'Close AI';
+
+            // Show the OpenAI iframe container
+            document.getElementById('openai-iframe-container').style.display = 'block';
+
+            // Show the fullscreen and cloak buttons for OpenAI
+            document.getElementById('fullscreen-btn').style.display = 'inline-block';
+            document.getElementById('cloak-btn').style.display = 'inline-block';
+
+            // Hide VM iframe container if it was visible
+            document.getElementById('iframe-container').style.display = 'none';
+        }
+
+        // Function to close the OpenAI iframe
+        function closeAI() {
+            // Hide the OpenAI iframe
+            document.getElementById('openai-iframe-container').style.display = 'none';
+
+            // Show the "AI has been closed" message
+            document.getElementById('close-ai-message').style.display = 'block';
+
+            // Show the OpenAI button again for reopening
+            document.getElementById('open-ai-btn').style.display = 'inline-block';
+            document.getElementById('open-ai-btn').textContent = 'Open AI';
+        }
+
+        // Function to kill the VM and hide iframe & buttons
+        function killVM() {
+            // Hide the VM iframe and buttons
+            document.getElementById('iframe-container').style.display = 'none';
+            document.getElementById('fullscreen-btn').style.display = 'none';
+            document.getElementById('cloak-btn').style.display = 'none';
+            document.getElementById('kill-vm-btn').style.display = 'none';
+
+            // Show the "Open VM" button again
+            document.getElementById('open-vm-btn').style.display = 'inline-block';
+
+            // Show the shutdown message on the page
+            document.getElementById('shutdown-message').style.display = 'block';
+
+            // Hide the OpenAI iframe if it was visible
+            document.getElementById('openai-iframe-container').style.display = 'none';
+
+            // Reset OpenAI button
+            document.getElementById('open-ai-btn').style.display = 'inline-block';
+            document.getElementById('open-ai-btn').textContent = 'Open AI';
         }
 
         // Function to toggle fullscreen mode
         function toggleFullscreen() {
-            var iframe = document.getElementById('iframe');
+            var iframe = document.querySelector('iframe:visible'); // Get the visible iframe
 
             // Check if the iframe is already in fullscreen
             if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement) {
@@ -205,23 +329,8 @@
 
         // Function to cloak the iframe (load about:blank)
         function cloakIframe() {
-            var iframe = document.getElementById('iframe');
+            var iframe = document.querySelector('iframe:visible'); // Check whichever iframe is visible
             iframe.src = "about:blank"; // Load a blank page in the iframe
-        }
-
-        // Function to kill the VM and hide iframe & buttons
-        function killVM() {
-            // Hide the iframe and buttons
-            document.getElementById('iframe-container').style.display = 'none';
-            document.getElementById('fullscreen-btn').style.display = 'none';
-            document.getElementById('cloak-btn').style.display = 'none';
-            document.getElementById('kill-vm-btn').style.display = 'none';
-
-            // Show the "Open VM" button again
-            document.getElementById('open-vm-btn').style.display = 'inline-block';
-
-            // Show the shutdown message on the page
-            document.getElementById('shutdown-message').style.display = 'block';
         }
     </script>
 
